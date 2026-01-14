@@ -20,7 +20,7 @@ Stack: React + Vite + FastAPI + PostgreSQL + Docker
 ## Requirements
 
 - Node.js 18+
-- Python 3.14+
+- Python 3.12+
 - Docker and Docker compose
 - PostgreSQL (installing through Docker)
 
