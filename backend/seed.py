@@ -1,11 +1,12 @@
-# Seed database with faker data
-
+# seed.py
+import asyncio
 import random
-from datetime import date, timedelta
+from datetime import timedelta
 
 from faker import Faker
+from sqlalchemy import select, func
 
-from app.db.database import SessionLocal
+from app.db.database import AsyncSessionLocal
 from app.db.models import (
     Client,
     Deposit,
@@ -53,50 +54,43 @@ DEPOSIT_TYPES_DATA = [
     "Пенсионный",
 ]
 
-# Проверка, что данные существуют
 
-
-def is_database_seeded(db) -> bool:
-    count = db.query(Client).count()
+async def is_database_seeded(db) -> bool:
+    """Проверка, есть ли уже данные в БД"""
+    result = await db.execute(select(func.count(Client.id)))
+    count = result.scalar()
     return count > 0
 
 
-# Функции заполнения
-
-
-def seed_jobs(db) -> list[Job]:
+async def seed_jobs(db) -> list[Job]:
     jobs = [Job(name=j["name"], salary=j["salary"]) for j in JOBS_DATA]
     db.add_all(jobs)
-    db.flush()
+    await db.flush()
     return jobs
 
 
-# Education level
-def seed_education_levels(db) -> list[EducationLevel]:
+async def seed_education_levels(db) -> list[EducationLevel]:
     levels = [EducationLevel(name=name) for name in EDUCATION_LEVELS_DATA]
     db.add_all(levels)
-    db.flush()
+    await db.flush()
     return levels
 
 
-# Marital status
-def seed_marital_statuses(db) -> list[MaritalStatus]:
+async def seed_marital_statuses(db) -> list[MaritalStatus]:
     statuses = [MaritalStatus(name=name) for name in MARITAL_STATUSES_DATA]
     db.add_all(statuses)
-    db.flush()
+    await db.flush()
     return statuses
 
 
-# Deposit types
-def seed_deposit_types(db) -> list[DepositType]:
+async def seed_deposit_types(db) -> list[DepositType]:
     types = [DepositType(name=name) for name in DEPOSIT_TYPES_DATA]
     db.add_all(types)
-    db.flush()
+    await db.flush()
     return types
 
 
-# Clients
-def seed_clients(
+async def seed_clients(
     db,
     jobs: list[Job],
     education_levels: list[EducationLevel],
@@ -108,19 +102,18 @@ def seed_clients(
         client = Client(
             full_name=fake.name(),
             age=random.randint(21, 70),
-            is_bankrupt=random.random() < 0.05,  # 5% банкротов
+            is_bankrupt=random.random() < 0.05,
             job_id=random.choice(jobs).id,
             education_level_id=random.choice(education_levels).id,
             marital_status_id=random.choice(marital_statuses).id,
         )
         clients.append(client)
     db.add_all(clients)
-    db.flush()
+    await db.flush()
     return clients
 
 
-# Loans
-def seed_loans(
+async def seed_loans(
     db, clients: list[Client], min_per_client: int = 0, max_per_client: int = 3
 ):
     loans = []
@@ -128,9 +121,9 @@ def seed_loans(
         num_loans = random.randint(min_per_client, max_per_client)
         for _ in range(num_loans):
             start = fake.date_between(start_date="-2y", end_date="today")
-            end = start + timedelta(days=random.randint(180, 1825))  # 6 мес - 5 лет
+            end = start + timedelta(days=random.randint(180, 1825))
             amount = round(random.uniform(50000, 5000000), 2)
-            is_overdue = random.random() < 0.15  # 15% просроченных
+            is_overdue = random.random() < 0.15
 
             loan = Loan(
                 client_id=client.id,
@@ -145,12 +138,11 @@ def seed_loans(
             )
             loans.append(loan)
     db.add_all(loans)
-    db.flush()
+    await db.flush()
     return loans
 
 
-# Deposits
-def seed_deposits(
+async def seed_deposits(
     db,
     clients: list[Client],
     deposit_types: list[DepositType],
@@ -162,11 +154,10 @@ def seed_deposits(
         num_deposits = random.randint(min_per_client, max_per_client)
         for _ in range(num_deposits):
             start = fake.date_between(start_date="-3y", end_date="today")
-            end = start + timedelta(days=random.randint(90, 1095))  # 3 мес - 3 года
+            end = start + timedelta(days=random.randint(90, 1095))
             amount = round(random.uniform(10000, 2000000), 2)
             interest_rate = round(random.uniform(4.0, 12.0), 2)
 
-            # Расчёт итоговой суммы с процентами
             days = (end - start).days
             years = days / 365
             final_amount = round(amount * (1 + interest_rate / 100 * years), 2)
@@ -182,53 +173,52 @@ def seed_deposits(
             )
             deposits.append(deposit)
     db.add_all(deposits)
-    db.flush()
+    await db.flush()
     return deposits
 
 
-# Main function
-def seed_database():
-    db = SessionLocal()
-    try:
-        if is_database_seeded(db):
-            print("✅ Database already seeded, skipping...")
-            return
+async def seed_database():
+    async with AsyncSessionLocal() as db:
+        try:
+            if await is_database_seeded(db):
+                print("✅ Database already seeded, skipping...")
+                return
 
-        print("🌱 Starting database seeding...")
+            print("🌱 Starting database seeding...")
 
-        # Этап 1: Справочники
-        jobs = seed_jobs(db)
-        education_levels = seed_education_levels(db)
-        marital_statuses = seed_marital_statuses(db)
-        deposit_types = seed_deposit_types(db)
+            # Этап 1: Справочники
+            jobs = await seed_jobs(db)
+            education_levels = await seed_education_levels(db)
+            marital_statuses = await seed_marital_statuses(db)
+            deposit_types = await seed_deposit_types(db)
 
-        # Этап 2: Клиенты
-        clients = seed_clients(db, jobs, education_levels, marital_statuses, count=100)
+            # Этап 2: Клиенты
+            clients = await seed_clients(
+                db, jobs, education_levels, marital_statuses, count=100
+            )
 
-        # Этап 3: Финансовые операции
-        loans = seed_loans(db, clients)
-        deposits = seed_deposits(db, clients, deposit_types)
+            # Этап 3: Финансовые операции
+            loans = await seed_loans(db, clients)
+            deposits = await seed_deposits(db, clients, deposit_types)
 
-        db.commit()
+            await db.commit()
 
-        # Статистика
-        print("✅ Database seeded successfully!")
-        print("📊 Seeding Statistics:")
-        print(f"   - Jobs: {len(jobs)}")
-        print(f"   - Education Levels: {len(education_levels)}")
-        print(f"   - Marital Statuses: {len(marital_statuses)}")
-        print(f"   - Deposit Types: {len(deposit_types)}")
-        print(f"   - Clients: {len(clients)}")
-        print(f"   - Loans: {len(loans)}")
-        print(f"   - Deposits: {len(deposits)}")
+            # Статистика
+            print("✅ Database seeded successfully!")
+            print("📊 Seeding Statistics:")
+            print(f"   - Jobs: {len(jobs)}")
+            print(f"   - Education Levels: {len(education_levels)}")
+            print(f"   - Marital Statuses: {len(marital_statuses)}")
+            print(f"   - Deposit Types: {len(deposit_types)}")
+            print(f"   - Clients: {len(clients)}")
+            print(f"   - Loans: {len(loans)}")
+            print(f"   - Deposits: {len(deposits)}")
 
-    except Exception as e:
-        db.rollback()
-        print(f"❌ Seeding failed: {e}")
-        raise
-    finally:
-        db.close()
+        except Exception as e:
+            await db.rollback()
+            print(f"❌ Seeding failed: {e}")
+            raise
 
 
 if __name__ == "__main__":
-    seed_database()
+    asyncio.run(seed_database())
