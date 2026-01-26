@@ -1,6 +1,5 @@
 from datetime import date
 from typing import Optional
-from pydantic import Field
 from app.schemas.common import ORMBase
 from app.schemas.references import DepositType
 
@@ -17,6 +16,17 @@ class LoanBase(ORMBase):
 
 class LoanCreate(LoanBase):
     client_id: int
+
+
+class LoanUpdate(ORMBase):
+    """Schema for updating a loan. All fields are optional."""
+
+    amount: Optional[float] = None
+    interest_rate: Optional[float] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    is_overdue: Optional[bool] = None
+    overdue_amount: Optional[float] = None
 
 
 class Loan(LoanBase):
@@ -36,6 +46,17 @@ class DepositBase(ORMBase):
 class DepositCreate(DepositBase):
     client_id: int
     type_id: int
+
+
+class DepositUpdate(ORMBase):
+    """Schema for updating a deposit. All fields are optional."""
+
+    amount: Optional[float] = None
+    interest_rate: Optional[float] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    final_amount: Optional[float] = None
+    type_id: Optional[int] = None
 
 
 class Deposit(DepositBase):
