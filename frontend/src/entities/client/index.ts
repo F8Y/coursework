@@ -1,10 +1,6 @@
-// Entities layer exports
-export {
-    clientsApi,
-    referencesApi,
-    financeApi,
-} from './client';
-
+// Client entity exports
+export { clientsApi, referencesApi } from './api';
+export { financeApi } from './finance-api';
 export type {
     Job,
     EducationLevel,
@@ -21,4 +17,4 @@ export type {
     Deposit,
     DepositCreate,
     DepositUpdate,
-} from './client';
+} from './types';
