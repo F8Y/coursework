@@ -1,0 +1,82 @@
+@use '@app/styles/variables' as *;
+@use '@app/styles/mixins' as *;
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-1;
+
+    &--full {
+        width: 100%;
+    }
+}
+
+.label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-text-primary;
+}
+
+.selectWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: $color-bg-primary;
+    border: 1px solid $color-gray-300;
+    border-radius: $radius-md;
+    transition: all $transition-fast;
+
+    &:hover {
+        border-color: $color-gray-400;
+    }
+
+    &:focus-within {
+        border-color: $color-primary-500;
+        box-shadow: 0 0 0 3px rgba($color-primary-500, 0.1);
+    }
+
+    &--error {
+        border-color: $color-error;
+
+        &:focus-within {
+            border-color: $color-error;
+            box-shadow: 0 0 0 3px rgba($color-error, 0.1);
+        }
+    }
+}
+
+.select {
+    width: 100%;
+    padding: $spacing-2 $spacing-8 $spacing-2 $spacing-3;
+    font-size: $font-size-base;
+    color: $color-text-primary;
+    background: transparent;
+    border: none;
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+
+    &:disabled {
+        background: $color-gray-50;
+        cursor: not-allowed;
+    }
+
+    option {
+        color: $color-text-primary;
+        background: $color-bg-primary;
+    }
+}
+
+.icon {
+    position: absolute;
+    right: $spacing-3;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: $color-gray-400;
+    pointer-events: none;
+}
+
+.error {
+    font-size: $font-size-sm;
+    color: $color-error;
+}
