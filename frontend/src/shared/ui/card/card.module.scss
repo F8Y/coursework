@@ -1,0 +1,63 @@
+@use '@app/styles/variables' as *;
+@use '@app/styles/mixins' as *;
+
+.card {
+    @include card;
+    @include fade-in;
+    overflow: hidden;
+
+    // Padding variants
+    &--padding-none {
+        padding: 0;
+    }
+
+    &--padding-sm {
+        padding: $spacing-3;
+    }
+
+    &--padding-md {
+        padding: $spacing-4;
+
+        @include md {
+            padding: $spacing-6;
+        }
+    }
+
+    &--padding-lg {
+        padding: $spacing-6;
+
+        @include md {
+            padding: $spacing-8;
+        }
+    }
+
+    // Hoverable
+    &--hoverable {
+        @include card-hover;
+        cursor: pointer;
+    }
+}
+
+.header {
+    @include flex-between;
+    padding-bottom: $spacing-4;
+    margin-bottom: $spacing-4;
+    border-bottom: 1px solid $color-gray-200;
+}
+
+.title {
+    @include heading-4;
+    margin: 0;
+}
+
+.content {
+    color: $color-text-secondary;
+}
+
+.footer {
+    @include flex-start;
+    gap: $spacing-3;
+    padding-top: $spacing-4;
+    margin-top: $spacing-4;
+    border-top: 1px solid $color-gray-200;
+}
