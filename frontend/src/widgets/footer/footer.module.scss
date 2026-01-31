@@ -1,1 +1,20 @@
-@use '@/app/styles/index' as i;
+@use '@app/styles/variables' as *;
+@use '@app/styles/mixins' as *;
+
+.footer {
+    margin-top: auto;
+    padding: $spacing-6 0;
+    background: $color-bg-primary;
+    border-top: 1px solid $color-gray-200;
+}
+
+.container {
+    @include container;
+}
+
+.text {
+    @include small-text;
+    text-align: center;
+    color: $color-text-tertiary;
+    margin: 0;
+}
