@@ -29,6 +29,9 @@
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
+      "@/*": [
+        "src/*"
+      ],
       "@app/*": [
         "src/app/*"
       ],
