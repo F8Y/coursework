@@ -1,0 +1,205 @@
+// ============================================
+// MIXINS & UTILITIES
+// ============================================
+
+@use 'variables' as *;
+
+// Responsive breakpoints
+@mixin sm {
+    @media (min-width: $breakpoint-sm) {
+        @content;
+    }
+}
+
+@mixin md {
+    @media (min-width: $breakpoint-md) {
+        @content;
+    }
+}
+
+@mixin lg {
+    @media (min-width: $breakpoint-lg) {
+        @content;
+    }
+}
+
+@mixin xl {
+    @media (min-width: $breakpoint-xl) {
+        @content;
+    }
+}
+
+// Flexbox shortcuts
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+@mixin flex-start {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+// Typography
+@mixin heading-1 {
+    font-size: $font-size-4xl;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-tight;
+    color: $color-text-primary;
+}
+
+@mixin heading-2 {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-semibold;
+    line-height: $line-height-tight;
+    color: $color-text-primary;
+}
+
+@mixin heading-3 {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-semibold;
+    line-height: $line-height-tight;
+    color: $color-text-primary;
+}
+
+@mixin heading-4 {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-medium;
+    line-height: $line-height-normal;
+    color: $color-text-primary;
+}
+
+@mixin body-text {
+    font-size: $font-size-base;
+    font-weight: $font-weight-normal;
+    line-height: $line-height-normal;
+    color: $color-text-secondary;
+}
+
+@mixin small-text {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-normal;
+    line-height: $line-height-normal;
+    color: $color-text-tertiary;
+}
+
+// Card styles
+@mixin card {
+    background: $color-bg-primary;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-md;
+    border: 1px solid $color-gray-200;
+}
+
+@mixin card-hover {
+    transition: all $transition-normal;
+
+    &:hover {
+        box-shadow: $shadow-lg;
+        transform: translateY(-2px);
+    }
+}
+
+// Button base
+@mixin button-base {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-2;
+    padding: $spacing-2 $spacing-4;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    border-radius: $radius-md;
+    border: none;
+    cursor: pointer;
+    transition: all $transition-fast;
+    text-decoration: none;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+// Focus ring
+@mixin focus-ring {
+    &:focus-visible {
+        outline: 2px solid $color-primary-500;
+        outline-offset: 2px;
+    }
+}
+
+// Truncate text
+@mixin truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Container
+@mixin container {
+    width: 100%;
+    max-width: $container-max-width;
+    margin: 0 auto;
+    padding: 0 $spacing-4;
+
+    @include md {
+        padding: 0 $spacing-6;
+    }
+
+    @include lg {
+        padding: 0 $spacing-8;
+    }
+}
+
+// Glass effect
+@mixin glass {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+// Skeleton loading
+@mixin skeleton {
+    background: linear-gradient(90deg,
+            $color-gray-200 25%,
+            $color-gray-100 50%,
+            $color-gray-200 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+// Fade in animation
+@mixin fade-in {
+    animation: fadeIn $transition-normal forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
