@@ -1,0 +1,92 @@
+@use '@app/styles/variables' as *;
+@use '@app/styles/mixins' as *;
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-1;
+
+    &--full {
+        width: 100%;
+    }
+}
+
+.label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-text-primary;
+}
+
+.inputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: $color-bg-primary;
+    border: 1px solid $color-gray-300;
+    border-radius: $radius-md;
+    transition: all $transition-fast;
+
+    &:hover {
+        border-color: $color-gray-400;
+    }
+
+    &:focus-within {
+        border-color: $color-primary-500;
+        box-shadow: 0 0 0 3px rgba($color-primary-500, 0.1);
+    }
+
+    &--error {
+        border-color: $color-error;
+
+        &:focus-within {
+            border-color: $color-error;
+            box-shadow: 0 0 0 3px rgba($color-error, 0.1);
+        }
+    }
+}
+
+.icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: $spacing-3;
+    color: $color-gray-400;
+
+    svg {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+}
+
+.input {
+    width: 100%;
+    padding: $spacing-2 $spacing-3;
+    font-size: $font-size-base;
+    color: $color-text-primary;
+    background: transparent;
+    border: none;
+    outline: none;
+
+    &::placeholder {
+        color: $color-text-tertiary;
+    }
+
+    &--withIcon {
+        padding-left: $spacing-2;
+    }
+
+    &:disabled {
+        background: $color-gray-50;
+        cursor: not-allowed;
+    }
+}
+
+.error {
+    font-size: $font-size-sm;
+    color: $color-error;
+}
+
+.helper {
+    font-size: $font-size-sm;
+    color: $color-text-tertiary;
+}
