@@ -1,0 +1,168 @@
+@use '@app/styles/variables' as *;
+@use '@app/styles/mixins' as *;
+
+.page {
+    flex: 1;
+    padding: $spacing-6 0;
+}
+
+.container {
+    @include container;
+}
+
+.loader {
+    @include flex-center;
+    min-height: 400px;
+}
+
+.header {
+    @include flex-between;
+    flex-wrap: wrap;
+    gap: $spacing-4;
+    margin-bottom: $spacing-6;
+}
+
+.title {
+    @include heading-2;
+    margin-bottom: $spacing-1;
+}
+
+.subtitle {
+    @include body-text;
+    color: $color-text-tertiary;
+}
+
+.error {
+    padding: $spacing-4;
+    margin-bottom: $spacing-6;
+    background: rgba($color-error, 0.1);
+    color: $color-error;
+    border-radius: $radius-md;
+}
+
+// Controls (Search)
+.controls {
+    margin-bottom: $spacing-4;
+}
+
+.searchWrapper {
+    max-width: 320px;
+}
+
+// Table
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+        padding: $spacing-3 $spacing-4;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    th {
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+        color: $color-text-tertiary;
+        background: $color-gray-50;
+        border-bottom: 1px solid $color-gray-200;
+    }
+
+    td {
+        font-size: $font-size-sm;
+        color: $color-text-secondary;
+        border-bottom: 1px solid $color-gray-100;
+    }
+}
+
+// Sortable Headers
+.sortableHeader {
+    cursor: pointer;
+    transition: background $transition-fast;
+    user-select: none;
+
+    &:hover {
+        background: $color-gray-100;
+        color: $color-text-primary;
+    }
+}
+
+.headerContent {
+    @include flex-start;
+    gap: $spacing-2;
+}
+
+.sortIconInfo {
+    color: $color-gray-300;
+}
+
+.sortIconActive {
+    color: $color-primary-600;
+}
+
+.tableRow {
+    cursor: pointer;
+    transition: background $transition-fast;
+
+    &:hover {
+        background: $color-gray-50;
+    }
+
+    &:last-child td {
+        border-bottom: none;
+    }
+}
+
+.idCell {
+    color: $color-text-tertiary;
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+}
+
+.nameCell {
+    @include flex-start;
+    gap: $spacing-3;
+}
+
+.avatar {
+    @include flex-center;
+    width: 2rem;
+    height: 2rem;
+    background: linear-gradient(135deg, $color-primary-400, $color-primary-600);
+    color: $color-text-inverse;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    border-radius: $radius-full;
+    flex-shrink: 0;
+}
+
+.nameLink {
+    color: $color-text-primary;
+    font-weight: $font-weight-medium;
+    text-decoration: none;
+
+    &:hover {
+        color: $color-primary-600;
+        text-decoration: underline;
+    }
+}
+
+.salaryCell {
+    font-family: $font-family-mono;
+    font-weight: $font-weight-medium;
+    color: $color-text-primary;
+}
+
+.tableFooter {
+    padding: $spacing-3 $spacing-4;
+    border-top: 1px solid $color-gray-200;
+}
+
+.count {
+    @include small-text;
+}
