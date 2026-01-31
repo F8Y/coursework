@@ -1,0 +1,235 @@
+@use '@app/styles/variables' as *;
+@use '@app/styles/mixins' as *;
+
+.page {
+    flex: 1;
+    padding: $spacing-6 0;
+}
+
+.container {
+    @include container;
+}
+
+.loader {
+    @include flex-center;
+    min-height: 400px;
+}
+
+// Back Link
+.backLink {
+    @include flex-start;
+    gap: $spacing-2;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    text-decoration: none;
+    margin-bottom: $spacing-4;
+    transition: color $transition-fast;
+
+    &:hover {
+        color: $color-primary-600;
+    }
+}
+
+// Client Header
+.clientHeader {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-4;
+    margin-bottom: $spacing-6;
+
+    @include md {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.clientInfo {
+    @include flex-start;
+    gap: $spacing-4;
+}
+
+.avatar {
+    @include flex-center;
+    width: 4rem;
+    height: 4rem;
+    background: linear-gradient(135deg, $color-primary-400, $color-primary-600);
+    color: $color-text-inverse;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    border-radius: $radius-xl;
+    flex-shrink: 0;
+}
+
+.clientName {
+    @include heading-2;
+    @include flex-start;
+    flex-wrap: wrap;
+    gap: $spacing-3;
+    margin-bottom: $spacing-1;
+}
+
+.badge {
+    flex-shrink: 0;
+}
+
+.clientMeta {
+    @include body-text;
+    color: $color-text-tertiary;
+    margin: 0;
+}
+
+.actions {
+    @include flex-start;
+    gap: $spacing-2;
+}
+
+// Info Grid
+.infoGrid {
+    display: grid;
+    gap: $spacing-4;
+    margin-bottom: $spacing-6;
+
+    @include sm {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    @include lg {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.infoCard {
+    display: flex;
+    flex-direction: row;
+}
+
+.infoCard :global(.card-content) {
+    @include flex-start;
+    gap: $spacing-4;
+    width: 100%;
+}
+
+.infoIcon {
+    @include flex-center;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: $color-primary-100;
+    color: $color-primary-600;
+    border-radius: $radius-md;
+    flex-shrink: 0;
+}
+
+.infoContent {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.infoLabel {
+    @include small-text;
+    color: $color-text-tertiary;
+}
+
+.infoValue {
+    font-weight: $font-weight-medium;
+    color: $color-text-primary;
+    @include truncate;
+}
+
+.infoSub {
+    @include small-text;
+    color: $color-primary-600;
+    font-weight: $font-weight-medium;
+}
+
+// Section Card
+.sectionCard {
+    margin-bottom: $spacing-6;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.sectionIcon {
+    margin-right: $spacing-2;
+    color: $color-text-tertiary;
+}
+
+.emptySection {
+    @include flex-center;
+    padding: $spacing-8;
+    color: $color-text-tertiary;
+}
+
+// Items Grid (Loans/Deposits)
+.itemsGrid {
+    display: grid;
+    gap: $spacing-4;
+
+    @include md {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.item {
+    padding: $spacing-4;
+    background: $color-gray-50;
+    border-radius: $radius-lg;
+    border: 1px solid $color-gray-200;
+}
+
+.itemHeader {
+    @include flex-between;
+    margin-bottom: $spacing-2;
+}
+
+.itemAmount {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    font-family: $font-family-mono;
+}
+
+.itemDetails {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-4;
+    margin-bottom: $spacing-2;
+}
+
+.itemDetail {
+    @include flex-start;
+    gap: $spacing-1;
+    font-size: $font-size-sm;
+    color: $color-text-tertiary;
+
+    svg {
+        flex-shrink: 0;
+    }
+}
+
+.overdueAmount {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-error;
+}
+
+.finalAmount {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-primary-600;
+}
+
+// Delete Modal
+.deleteText {
+    @include body-text;
+    margin: 0;
+
+    strong {
+        color: $color-text-primary;
+    }
+}
