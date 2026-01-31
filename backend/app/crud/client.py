@@ -18,7 +18,7 @@ async def get_clients(
     If we want to show Job Name in the list, we would need to join Job.
     Assume ClientSummary is lightweight.
     """
-    stmt = select(Client).offset(skip).limit(limit)
+    stmt = select(Client).options(selectinload(Client.job)).offset(skip).limit(limit)
     result = await db.execute(stmt)
     return result.scalars().all()
 
@@ -73,7 +73,11 @@ async def create_client(db: AsyncSession, client_in: ClientCreate) -> Client:
     db.add(db_client)
     await db.commit()
     await db.refresh(db_client)
-    return db_client
+    # Re-fetch to load relations (needed for response model)
+    created_client = await get_client_by_id(db, db_client.id)
+    if not created_client:
+         return db_client # Should not happen
+    return created_client
 
 
 # --- UPDATE ---
@@ -116,9 +120,7 @@ async def get_client_finance_counts(
     Get counts of loans and deposits for a client.
     Returns (loans_count, deposits_count).
     """
-    loans_result = await db.execute(
-        select(Loan).where(Loan.client_id == client_id)
-    )
+    loans_result = await db.execute(select(Loan).where(Loan.client_id == client_id))
     loans_count = len(loans_result.scalars().all())
 
     deposits_result = await db.execute(
@@ -134,11 +136,11 @@ async def delete_client(
 ) -> Optional[dict]:
     """
     Delete a client.
-    
+
     If force=False (default):
         - Returns None if client not found
         - Raises ValueError if client has loans/deposits
-    
+
     If force=True:
         - Deletes client and all related loans/deposits
         - Returns dict with deletion stats
@@ -191,4 +193,3 @@ async def delete_client(
         "deleted_loans": deleted_loans,
         "deleted_deposits": deleted_deposits,
     }
-

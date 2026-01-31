@@ -36,6 +36,7 @@ class ClientSummary(ClientBase):
     """
 
     id: int
+    job: Optional[Job] = None
 
 
 class ClientDetail(ClientSummary):
