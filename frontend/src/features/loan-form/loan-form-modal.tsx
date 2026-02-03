@@ -8,14 +8,16 @@ import {
 import {
     financeApi,
     type LoanCreate,
+    type Loan,
 } from '@entities/index';
 import s from './loan-form.module.scss';
-import clsx from 'clsx';
+
 
 interface LoanFormModalProps {
     isOpen: boolean;
     onClose: () => void;
     clientId: number;
+    loan?: Loan;
     onSuccess: () => void;
 }
 
@@ -23,8 +25,10 @@ export const LoanFormModal = ({
     isOpen,
     onClose,
     clientId,
+    loan,
     onSuccess,
 }: LoanFormModalProps) => {
+    const isEdit = !!loan;
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -37,20 +41,31 @@ export const LoanFormModal = ({
         overdue_amount: 0,
     });
 
-    // Reset form on open
+    // Reset/Populate form on open
     useEffect(() => {
         if (isOpen) {
-            setFormData({
-                amount: 100000,
-                interest_rate: 12.5,
-                start_date: new Date().toISOString().split('T')[0],
-                end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-                is_overdue: false,
-                overdue_amount: 0,
-            });
+            if (loan) {
+                setFormData({
+                    amount: loan.amount,
+                    interest_rate: loan.interest_rate,
+                    start_date: loan.start_date.split('T')[0],
+                    end_date: loan.end_date.split('T')[0],
+                    is_overdue: loan.is_overdue,
+                    overdue_amount: loan.is_overdue ? loan.overdue_amount : 0,
+                });
+            } else {
+                setFormData({
+                    amount: 100000,
+                    interest_rate: 12.5,
+                    start_date: new Date().toISOString().split('T')[0],
+                    end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+                    is_overdue: false,
+                    overdue_amount: 0,
+                });
+            }
             setError(null);
         }
-    }, [isOpen]);
+    }, [isOpen, loan]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -58,15 +73,19 @@ export const LoanFormModal = ({
         setError(null);
 
         try {
-            await financeApi.createLoan({
-                ...formData,
-                client_id: clientId,
-            });
+            if (isEdit && loan) {
+                await financeApi.updateLoan(loan.id, formData);
+            } else {
+                await financeApi.createLoan({
+                    ...formData,
+                    client_id: clientId,
+                });
+            }
             onSuccess();
             onClose();
         } catch (err: any) {
             console.error(err);
-            setError(err.message || 'Failed to create loan');
+            setError(err.message || 'Failed to save loan');
         } finally {
             setSubmitting(false);
         }
@@ -76,7 +95,7 @@ export const LoanFormModal = ({
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title="Add Loan"
+            title={isEdit ? 'Edit Loan' : 'Add Loan'}
         >
             <form onSubmit={handleSubmit} className={s.form}>
                 {error && <div className={s.error}>{error}</div>}
@@ -84,6 +103,7 @@ export const LoanFormModal = ({
                 <Input
                     label="Amount (₽)"
                     type="number"
+                    step="0.01"
                     value={formData.amount}
                     onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
                     min={0}
@@ -133,6 +153,7 @@ export const LoanFormModal = ({
                     <Input
                         label="Overdue Amount (₽)"
                         type="number"
+                        step="0.01"
                         value={formData.overdue_amount}
                         onChange={(e) => setFormData({ ...formData, overdue_amount: parseFloat(e.target.value) || 0 })}
                         min={0}
@@ -144,7 +165,7 @@ export const LoanFormModal = ({
                         Cancel
                     </Button>
                     <Button type="submit" isLoading={submitting}>
-                        Create Loan
+                        {isEdit ? 'Save Changes' : 'Create Loan'}
                     </Button>
                 </ModalFooter>
             </form>

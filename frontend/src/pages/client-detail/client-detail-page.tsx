@@ -27,9 +27,10 @@ import {
     Modal,
     ModalFooter,
 } from '@shared/index';
-import { clientsApi, type ClientFull, type Loan, type Deposit } from '@entities/index';
+import { clientsApi, financeApi, type ClientFull, type Loan, type Deposit } from '@entities/index';
 import { ClientFormModal, LoanFormModal, DepositFormModal } from '@features/index';
 import s from './client-detail-page.module.scss';
+import clsx from 'clsx';
 
 // Format date helper
 const formatDate = (dateStr: string) => {
@@ -54,12 +55,26 @@ export const ClientDetailPage = () => {
     const [error, setError] = useState<string | null>(null);
 
     // Modals state
-    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [deleting, setDeleting] = useState(false);
-
     const [isEditClientModalOpen, setEditClientModalOpen] = useState(false);
     const [isLoanModalOpen, setLoanModalOpen] = useState(false);
     const [isDepositModalOpen, setDepositModalOpen] = useState(false);
+
+    // Edit/Delete State
+    const [editLoan, setEditLoan] = useState<Loan | undefined>(undefined);
+    const [editDeposit, setEditDeposit] = useState<Deposit | undefined>(undefined);
+
+    const [deleteState, setDeleteState] = useState<{
+        isOpen: boolean;
+        type: 'client' | 'loan' | 'deposit';
+        id: number;
+        name?: string; // For confirmation text
+    }>({
+        isOpen: false,
+        type: 'client',
+        id: 0,
+    });
+
+    const [deleting, setDeleting] = useState(false);
 
     const fetchClient = async () => {
         if (!id) return;
@@ -79,20 +94,59 @@ export const ClientDetailPage = () => {
         fetchClient();
     }, [id]);
 
-    const handleDelete = async () => {
-        if (!id) return;
-
+    // Handle Deletion
+    const handleDeleteConfirm = async () => {
+        if (!client) return;
         setDeleting(true);
+
         try {
-            await clientsApi.delete(parseInt(id), true);
-            navigate('/clients');
+            if (deleteState.type === 'client') {
+                await clientsApi.delete(client.id, true);
+                navigate('/clients');
+            } else if (deleteState.type === 'loan') {
+                await financeApi.deleteLoan(deleteState.id);
+                fetchClient();
+                setDeleteState({ ...deleteState, isOpen: false });
+            } else if (deleteState.type === 'deposit') {
+                await financeApi.deleteDeposit(deleteState.id);
+                fetchClient();
+                setDeleteState({ ...deleteState, isOpen: false });
+            }
         } catch (err) {
             console.error(err);
-            setError('Failed to delete client');
+            // Maybe show toast or error
         } finally {
             setDeleting(false);
-            setDeleteModalOpen(false);
         }
+    };
+
+    const openLoanEdit = (loan: Loan) => {
+        setEditLoan(loan);
+        setLoanModalOpen(true);
+    };
+
+    const openLoanCreate = () => {
+        setEditLoan(undefined);
+        setLoanModalOpen(true);
+    };
+
+    const openDepositEdit = (deposit: Deposit) => {
+        setEditDeposit(deposit);
+        setDepositModalOpen(true);
+    };
+
+    const openDepositCreate = () => {
+        setEditDeposit(undefined);
+        setDepositModalOpen(true);
+    };
+
+    const openDeleteModal = (type: 'client' | 'loan' | 'deposit', id: number, name?: string) => {
+        setDeleteState({
+            isOpen: true,
+            type,
+            id,
+            name,
+        });
     };
 
     if (loading) {
@@ -162,7 +216,7 @@ export const ClientDetailPage = () => {
                         <Button
                             variant="danger"
                             leftIcon={<Trash2 size={16} />}
-                            onClick={() => setDeleteModalOpen(true)}
+                            onClick={() => openDeleteModal('client', client.id, client.full_name)}
                         >
                             Delete
                         </Button>
@@ -221,7 +275,7 @@ export const ClientDetailPage = () => {
                         <Button
                             size="sm"
                             leftIcon={<Plus size={14} />}
-                            onClick={() => setLoanModalOpen(true)}
+                            onClick={openLoanCreate}
                         >
                             Add Loan
                         </Button>
@@ -237,11 +291,21 @@ export const ClientDetailPage = () => {
                                     <div key={loan.id} className={s.item}>
                                         <div className={s.itemHeader}>
                                             <span className={s.itemAmount}>{formatCurrency(loan.amount)}</span>
-                                            {loan.is_overdue ? (
-                                                <Badge variant="danger" size="sm">Overdue</Badge>
-                                            ) : (
-                                                <Badge variant="success" size="sm">Active</Badge>
-                                            )}
+                                            <div className={s.itemHeaderRight}>
+                                                {loan.is_overdue ? (
+                                                    <Badge variant="danger" size="sm">Overdue</Badge>
+                                                ) : (
+                                                    <Badge variant="success" size="sm">Active</Badge>
+                                                )}
+                                                <div className={s.itemActions}>
+                                                    <button className={s.iconBtn} onClick={() => openLoanEdit(loan)}>
+                                                        <Edit size={16} />
+                                                    </button>
+                                                    <button className={clsx(s.iconBtn, s.iconBtnDanger)} onClick={() => openDeleteModal('loan', loan.id)}>
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className={s.itemDetails}>
                                             <div className={s.itemDetail}>
@@ -275,7 +339,7 @@ export const ClientDetailPage = () => {
                         <Button
                             size="sm"
                             leftIcon={<Plus size={14} />}
-                            onClick={() => setDepositModalOpen(true)}
+                            onClick={openDepositCreate}
                         >
                             Add Deposit
                         </Button>
@@ -291,7 +355,17 @@ export const ClientDetailPage = () => {
                                     <div key={deposit.id} className={s.item}>
                                         <div className={s.itemHeader}>
                                             <span className={s.itemAmount}>{formatCurrency(deposit.amount)}</span>
-                                            <Badge variant="info" size="sm">{deposit.type.name}</Badge>
+                                            <div className={s.itemHeaderRight}>
+                                                <Badge variant="info" size="sm">{deposit.type.name}</Badge>
+                                                <div className={s.itemActions}>
+                                                    <button className={s.iconBtn} onClick={() => openDepositEdit(deposit)}>
+                                                        <Edit size={16} />
+                                                    </button>
+                                                    <button className={clsx(s.iconBtn, s.iconBtnDanger)} onClick={() => openDeleteModal('deposit', deposit.id)}>
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className={s.itemDetails}>
                                             <div className={s.itemDetail}>
@@ -316,24 +390,27 @@ export const ClientDetailPage = () => {
 
             {/* MODALS */}
 
-            {/* Delete Confirmation */}
+            {/* Universal Delete Modal */}
             <Modal
-                isOpen={deleteModalOpen}
-                onClose={() => setDeleteModalOpen(false)}
-                title="Delete Client"
+                isOpen={deleteState.isOpen}
+                onClose={() => setDeleteState({ ...deleteState, isOpen: false })}
+                title={`Delete ${deleteState.type.charAt(0).toUpperCase() + deleteState.type.slice(1)}`}
                 size="sm"
             >
                 <p className={s.deleteText}>
-                    Are you sure you want to delete <strong>{client.full_name}</strong>?
-                    This will also delete all associated loans and deposits.
+                    {deleteState.type === 'client' ? (
+                        <>Are you sure you want to delete client <strong>{deleteState.name}</strong>? This will delete all loans and deposits too.</>
+                    ) : (
+                        <>Are you sure you want to delete this {deleteState.type}?</>
+                    )}
                 </p>
                 <ModalFooter>
-                    <Button variant="secondary" onClick={() => setDeleteModalOpen(false)}>
+                    <Button variant="secondary" onClick={() => setDeleteState({ ...deleteState, isOpen: false })}>
                         Cancel
                     </Button>
                     <Button
                         variant="danger"
-                        onClick={handleDelete}
+                        onClick={handleDeleteConfirm}
                         isLoading={deleting}
                     >
                         Delete
@@ -352,22 +429,24 @@ export const ClientDetailPage = () => {
                 }}
             />
 
-            {/* Add Loan */}
+            {/* Add/Edit Loan */}
             <LoanFormModal
                 isOpen={isLoanModalOpen}
                 onClose={() => setLoanModalOpen(false)}
                 clientId={client.id}
+                loan={editLoan}
                 onSuccess={() => {
                     setLoanModalOpen(false);
                     fetchClient();
                 }}
             />
 
-            {/* Add Deposit */}
+            {/* Add/Edit Deposit */}
             <DepositFormModal
                 isOpen={isDepositModalOpen}
                 onClose={() => setDepositModalOpen(false)}
                 clientId={client.id}
+                deposit={editDeposit}
                 onSuccess={() => {
                     setDepositModalOpen(false);
                     fetchClient();
